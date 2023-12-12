@@ -1,172 +1,185 @@
-[![Python package](https://github.com//actions/workflows/python-package.yml/badge.svg)](https://github.com//actions/workflows/python-package.yml)
+# Wind Tunnel Scenario
 
-[![Documentation Status](https://readthedocs.com/projects/inductiva-research-labs-/badge/?version=latest&token=a7a7344c5bc9e511ca715449f94612e4bb7c2dff4c90931778b9c85dbbf5480c)](https://inductiva-research-labs-.readthedocs-hosted.com/en/latest/?badge=latest)
+This scenario models the aerodynamics of an object inside a virtual wind tunnel for a given airflow velocity. To model the air as an incompressible fluid and simplify the equations of motion under study, we restrict ourselves here to maximum speeds available is 100 m/s. Above this, the model is inaccurate since it does not account for the compressibility of the air at those speeds.
+Air is injected through one side of the wind tunnel and exits through an outlet on the opposite side. The airflow within the tunnel is modified according to the structure of the object. The system is modelled with the steady-state equations for incompressible flow and the $k-\epsilon$ turbulence models. The simulation is currently performed with the OpenFOAM simulator.
 
-# Start a project
+### Example:
 
-Use this template to generate a repository for your new project. By doing so you
-will quickly have access to a couple of tools we've already set up for you.
+**Note:** To access the visualization methods the user needs to install the extra dependencies for the fluids package with `pip install --upgrade "inductiva[fluids_extra]"`.
 
-## Python
+This example requires an object of OBJ or STL format, we make one available through the code.
 
-We love Python! To make our lives easier and write good code we follow a couple
-of common best practices:
+Do not forget to insert your API Key (check the [main page](https://github.com/inductiva/inductiva/tree/main#api-access-tokens) to see how to get one).
 
-* For local development we recommend using Python's virtual environments. This
-  way you can keep a separate environment for each project without polluting
-  your operating system with additional Python packages. We also recommend using
-  `pip` for managing those packages.
+```python
+import inductiva
 
-  To create a new virtual environment (only once):
+inductiva.api_key = "YOUR_API_KEY"
 
-  ```bash
-  python3 -m venv .env
-  ```
+# Url to a test an object in Inductiva Github repository
+vehicle_url = "https://raw.githubusercontent.com/inductiva/inductiva/main" \
+              "/assets/vehicle.obj"
+vehicle_path = inductiva.utils.files.download_from_url(vehicle_url)
 
-  To activate your virtual environment (every time you want to work on the
-  current project):
+# Initialize the scenario
+scenario = inductiva.fluids.WindTunnel(
+    flow_velocity=[30, 0, 0],
+    domain={"x": [-5, 15], "y": [-5, 5], "z": [0, 8]})
 
-  ```bash
-  source .env/bin/activate 
-  ```
+# Run a simulation
+task = scenario.simulate(
+    object_path=vehicle_path,
+    num_iterations=50, resolution="low")
 
-  It's always a good practice to upgrade `pip` when you create the virtual environment, before installing other packages. In the past we've noticed some
-  bugs with older versions of `pip`, causing the installation of incompatible
-  versions of several packages.
+# Download the simulation output to your local machine.
+output = task.get_output()
 
-  ```bash
-  pip install --upgrade pip
-  ```
+# Get a pressure_field mesh
+pressure_field = output.get_object_pressure_field()
 
-  To install the project's required packages (whenever dependencies must be
-  updated):
+# Render
+pressure_field.render()
+```
+<img src="/assets/media/openfoam/default_pressure_field.png" width="400" height="300" />
 
-  ```bash
-  pip install -r requirements.txt
-  ```
+## Scenario configuration
 
-* We follow
-  [Google's style guide](https://google.github.io/styleguide/pyguide.html).
-  Specifically, we format code with `yapf`, and check for bugs and style
-  problems with `pylint`.
+To initialize the scenario, the user can define the following parameters:
+- `domain`: Dimensions of the wind tunnel in meters, e.g. `{"x": [-5, 15], "y": [-5, 5], "z": [0, 8]}`.
+- `flow_velocity`: Airflow velocity in m/s, e.g. `[30, 0, 0]`. Notice that the airflow is injected from the negative x-direction.
 
-  Usually, there's no need to run these tools manually. We added continuous
-  integration (CI) through GitHub, so every time your pull request has errors
-  you'll be alerted via email. Over time you'll get used to these rules and
-  coding consistently will become second nature.
+Now, the user is ready to simulate the steady state. Here, the user chooses the object to be inserted inside the wind tunnel. This object is defined with a geometry file in [STL](https://en.wikipedia.org/wiki/STL_(file_format)) or [OBJ](https://en.wikipedia.org/wiki/Wavefront_.obj_file) format. Notice that:
+- the object is not re-scaled automatically, so the user must either change the dimensions of the domain or scale the object himself.
+- the required meshing step is automatically done on the backend before the simulation starts with [snappyHexMesh tool](https://www.openfoam.com/documentation/user-guide/4-mesh-generation-and-conversion/4.4-mesh-generation-with-the-snappyhexmesh-utility) of OpenFOAM.
 
-  However, if you want to run `yapf` and `pylint` locally, simply install them
-  via `pip`:
+The simulation parameters available for the user to configure are:
+- `num_iterations`: Set the maximum number of iterations for the iterative algorithm to converge.
+- `resolution`: Controls the resolution of the meshing that is done prior to the simulation. The higher the resolution, the finer the meshing. Available options: "high", "medium", "low".
 
-  ```bash
-  pip install yapf pylint
-  ```
+Moreover, the hardware is configured through the creation of a `machine_group` to run your simulations - see more in the [Machine Groups section](inductiva/resources/README.md).
+Launching a simulation returns a task object, which can be used to verify the status of the simulation, get the simulation outputs and access post-processing tools. See more in the [Tasks section](inductiva/tasks/README.md).
 
-* We write tests using `pytest`. See [`example_test.py`](example_test.py) for an
-  example and delete if example after you copied the template to your new
-  project.
+## Output and Post-Processing
 
-  Tests are also run automatically in GitHub via continuous integration. If you
-  want to run them locally, install `pytest`:
+The simulation output will contain several sub-directories with files that can be post-processed to extract relevant metrics, such as:
+- Pressure field: Pressure field of the airflow over the object.
+- Streamlines: Streamlines of the airflow over the domain and interacting with the object.
+- Flow slice: Slice of the flow that represents the airflow over the domain and interacting with the object.
+- Force coefficients: Force coefficients that represent the forces acting on the object. These are the drag and lift coefficients.
 
-  ```bash
-  pip install pytest
-  ```
+### Post-processing methods
 
-  and run:
+Since at times the simulation output files can be large, e.g. 1 Gb, the user can choose to download only some of the default outputs that are post-processed
+remotely by just doing `output=task.get_output()` (e.g., pressure field, streamlines and flow_slice). Alternatively, the user can choose to download all simulation outputs with `output=task.get_output(all_files=True)` and post-process as wishes locally. 
 
-  ```bash
-  pytest
-  ```
+In any case, to obtain these metrics the user can use the following post-processing methods available through the `output` object:
+- `get_output_mesh`: Returns two pyvista meshes, one of the airflow over the entire domain and the other of data on the object.
+    These meshes contain the results of the simulation, which are breakdown and visualized with the next methods.
+- `get_object_pressure_field`: Returns a MeshData object - object with scalar measurements at each point and face of the mesh, as well as rendering capabilities -  with the pressure field over the object mesh. This object can be rendered with `render()`.
+- `get_streamlines`: Input parameters - `max_time`, `n_points`, `initial_step_length`, `source_radius`, `source_center`. Returns a `Streamlines` - an object with the mesh of the streamlines and a `render()` method with the vehicle inside the WindTunnel. The streamlines have pressure and velocity components of airflow over the domain.
+- `get_flow_slice`: Input parameters - `plane`, `origin`. Returns a `FlowSlice` - an object with the mesh of a slice of the domain with flow properties over the mesh, and a `render()` method with the vehicle inside the WindTunnel. The flow slice has pressure and velocity components of the airflow over the domain.
+- `get_force_coefficients`: Returns a list with the force coefficients of the steady state - Drag, Lift, Front Lift and Rear Lift - that represent the forces acting on the object. 
 
-  in your base directory.
+Each visualization method has extra configuration parameters that can be passed to the `render()` method, see in the examples below for an overview for each of them.
 
-  `pytest` is smart enough to discover your tests automatically when you're
-  following
-  [the right conventions](https://docs.pytest.org/en/stable/goodpractices.html#conventions-for-python-test-discovery). At Inductiva we'd prefer that any
-  test file (e.g. `example_test.py`) stays in the same directory next to the
-  component it tests (e.g. `example.py`).
+**Remark: **
+- For those running on Google Colab or a headless server, further extra dependencies are required. Install them with `!apt install libgl1-mesa-glx xvfb`
 
-## Documentation
+Moreover, change the parameter `virtual_display` in the render method to `True`, and pass a path to save the result, like 
 
-We use [Sphinx](https://www.sphinx-doc.org/) to generate documentation to our
-projects. The documentation files can be written using either Markdown or
-reStructuredText syntax and are stored in the `docs` directory. See
-[`docs/index.md`](docs/index.md) for a collection of simple examples to get you
-started including math formulas and code snippets in your documentation.
-
-If you want to generate the documentation locally, simply install the
-dependencies via `pip`:
-
-```bash
-pip install -r docs/requirements.txt
+```python
+streamlines.render(virtual_display=True, save_path="streamlines.png")
 ```
 
-and run
+- To save your visualizations, please use the 'q' key to close the plotter. Some operating systems, particularly Windows, may encounter issues when attempting to save a screenshot if you use the exit button in the GUI.
 
-```bash
-sphinx-build -b html docs docs/_build
+The next example fetches the default post-processed files and renders the respective visualizations. The last one, fetches the full simulation outputs, and with the same interface the user can configure the post-processing methods to extract the metrics he desires and render the visualizations.
+
+### Example for default files:
+
+```python
+# Get the default files from WindTunnel simulation
+output = task.get_output()
+
+# Get a pressure_field mesh
+pressure_field = output.get_object_pressure_field()
+
+# Render
+pressure_field.render()
 ```
 
-in your base directory to build the documentation in `docs/_build`.
+<img src="/assets/media/openfoam/default_pressure_field.png" width="400" height="300" />
 
-To serve the documentation locally and automatically build it with new changes,
-install the `sphinx-autobuild` package,
+```python
+# Get a mesh of the streamlines 
+streamlines = output.get_streamlines()
 
-```bash
-pip install sphinx-autobuild
+# Render the streamlines
+streamlines.render(physical_field="velocity",
+                   flow_cmap="viridis",
+                   view="isometric",
+                   streamline_radius=0.1
+                   save_path="default_streamlines.png")
 ```
 
-and run in your base directory
+<img src="/assets/media/openfoam/default_streamlines.png" width="400" height="300" />
 
-```bash
-sphinx-autobuild -b html docs docs/_build
+
+```python
+# Get a mesh of the flow slice
+flow_slice = output.get_flow_slice(plane="xz")
+
+# Render the pressure field over the slice
+flow_slice.render(physical_field="pressure",
+                  flow_cmap="viridis",
+                  save_path="default_flow_slice.png")
 ```
 
-This will serve the documentation at <http://127.0.0.1:8000> and automatically
-update it when you save changes to the documentation files.
+<img src="/assets/media/openfoam/default_flow_slice.png" width="400" height="300" />
 
-The documentation may also be made available on
-[Read The Docs](https://readthedocs.org/) for configured repositories. When set
-up, this integration will build and deploy the documentation on each commit to
-the `main` branch.
+### Example for general Post-processing
 
-See the documentation for the start-a-project repo at:
+```python
+# Get all the WindTunnel simulation files
+output = task.get_output(all_files=True)
 
-https://inductiva-research-labs-start-a-project.readthedocs-hosted.com/en/latest/
+# Get a pressure field mesh
+pressure_field = output.get_object_pressure_field()
 
-Apart from documentation files, we also prepare README files using Markdown
-syntax to present short introductions of the projects. This README is one such
-example.
-
-
-## Conda Environments
-
-To automate all the setup commands above, we have created a Conda
-environment config file that you can use for your convenience.
-
-Make sure the first line of the conda.yml file contains a name related to 
-your project, such as:
-
-```
-name: startaproject_env
+# Render
+pressure_field.render(save_path="pressure_field.png")
 ```
 
-Note: If you are starting a new project from this template repo, it might work 
-automatically for you, because we use the placeholder `name: {{GITHUB_REPOSITORY#*/}}`
-that gets auto-filled with the repo name.
+<img src="/assets/media/openfoam/pressure_field.png" width="400" height="300" />
 
-Now, if you have conda installed, just run:
+```python
+# Get the streamlines mesh
+streamlines = output.get_streamlines(max_time=200,
+                                     n_points=200,
+                                     initial_step_length=0.1,
+                                     source_radius=0.5,
+                                     source_center=[-3, 0, 1])
 
-```bash
-conda env create -f conda.yml
+# Render the streamlines
+streamlines.render(physical_field="pressure",
+                   flow_cmap="viridis",
+                   view="isometric",
+                   streamline_radius=0.1,
+                   save_path="streamlines.png")
 ```
 
-This will install python 3.11, pylint, yapf, pytest, sphinx, and all the 
-package requirements, and you can now activate that environment with:
+<img src="/assets/media/openfoam/streamlines.png" width="400" height="300" />
 
-```bash
-conda activate startaproject_env
+```python
+
+# Get the flow slice mesh
+flow_slice = output.get_flow_slice(plane="xz",
+                                   origin=(0,0,0))
+
+# Render the velocity field over the flow slice.
+flow_slice.render(physical_field="velocity",
+                  flow_cmap="Blues",
+                  save_path="flow_slice.png")
 ```
 
-And you are good to go!
+<img src="/assets/media/openfoam/flow_slice.png" width="400" height="300" />

@@ -1,4 +1,4 @@
-name: {{GITHUB_REPOSITORY_WITHOUT_OWNER}}
+name: ${GITHUB_REPOSITORY#*\/}
 
 channels:
   - conda-forge

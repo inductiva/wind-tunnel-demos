@@ -8,6 +8,7 @@ the visualizations associated. Namely:
 
 Current Support - OpenFOAM
 """
+import csv
 import os
 from dataclasses import dataclass
 from enum import Enum
@@ -18,6 +19,13 @@ import glob
 from absl import logging
 
 import pyvista as pv
+
+
+@dataclass
+class OpenFOAMPhysicalField(Enum):
+    """Defines the notation used for physical field in OpenFOAM."""
+    PRESSURE = "p"
+    VELOCITY = "U"
 
 
 class WindTunnelOutput:
@@ -264,14 +272,6 @@ class WindTunnelOutput:
                     csv_writer.writerows(force_coefficients)
 
         return force_coefficients
-
-
-
-@dataclass
-class OpenFOAMPhysicalField(Enum):
-    """Defines the notation used for physical field in OpenFOAM."""
-    PRESSURE = "p"
-    VELOCITY = "U"
 
 
 class FlowSlice:

@@ -9,7 +9,7 @@ from typing import Optional, List, Literal
 from absl import logging
 import numpy as np
 
-from inductiva import tasks, resources, simulators, scenarios
+import inductiva
 
 SCENARIO_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 OPENFOAM_TEMPLATE_INPUT_DIR = "openfoam"
@@ -24,7 +24,7 @@ class MeshResolution(enum.Enum):
     VERY_LOW = [2, 3]
 
 
-class WindTunnel(scenarios.Scenario):
+class WindTunnel(inductiva.scenarios.Scenario):
     """Physical scenario of a configurable wind tunnel simulation.
 
     A wind tunnel is a tool used in aerodynamic research to study the
@@ -54,7 +54,7 @@ class WindTunnel(scenarios.Scenario):
     pressure_field, cutting planes and force coefficients.
     """
 
-    valid_simulators = [simulators.OpenFOAM]
+    valid_simulators = [inductiva.simulators.OpenFOAM]
     template_files_dir = os.path.join(SCENARIO_TEMPLATE_DIR,
                                       OPENFOAM_TEMPLATE_INPUT_DIR)
 
@@ -93,14 +93,15 @@ class WindTunnel(scenarios.Scenario):
             self.params["domain"] = domain
 
     def simulate(
-            self,
-            simulator: simulators.Simulator = simulators.OpenFOAM(),
-            machine_group: Optional[resources.MachineGroup] = None,
-            storage_dir: Optional[str] = "",
-            object_path: Optional[str] = None,
-            num_iterations: float = 100,
-            resolution: Literal["high", "medium",
-                                "low"] = "medium") -> tasks.Task:
+        self,
+        simulator: inductiva.simulators.Simulator = inductiva.simulators.
+        OpenFOAM(),
+        machine_group: Optional[inductiva.resources.MachineGroup] = None,
+        storage_dir: Optional[str] = "",
+        object_path: Optional[str] = None,
+        num_iterations: float = 100,
+        resolution: Literal["high", "medium", "low"] = "medium"
+    ) -> inductiva.tasks.Task:
         """Simulates the wind tunnel scenario synchronously.
 
         Args:
@@ -131,7 +132,10 @@ class WindTunnel(scenarios.Scenario):
 
         return task
 
-    def add_extra_input_files(self, simulator: simulators.OpenFOAM, input_dir):  # pylint: disable=unused-argument
+    def add_extra_input_files(
+            self,
+            simulator: inductiva.simulators.OpenFOAM,  # pylint: disable=unused-argument
+            input_dir):
         """Configure object to be in specific place on input directory."""
 
         object_dir = os.path.join(input_dir, "constant", "triSurface")

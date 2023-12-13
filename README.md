@@ -1,7 +1,23 @@
-# Wind Tunnel Scenario
+# Wind Tunnel via Inductiva API
 
-This scenario models the aerodynamics of an object inside a virtual wind tunnel for a given airflow velocity. To model the air as an incompressible fluid and simplify the equations of motion under study, we restrict ourselves here to maximum speeds available is 100 m/s. Above this, the model is inaccurate since it does not account for the compressibility of the air at those speeds.
-Air is injected through one side of the wind tunnel and exits through an outlet on the opposite side. The airflow within the tunnel is modified according to the structure of the object. The system is modelled with the steady-state equations for incompressible flow and the $k-\epsilon$ turbulence models. The simulation is currently performed with the OpenFOAM simulator.
+
+## Wind Tunnel
+
+Physical wind tunnels serve as a testing ground for the aerodynamic behavior of vehicles - from your everyday commuter car to the high-performance F1 car. However, physical testing is very costly, since it involves a massively expensive wind tunnel infrastructure and, of course, building physical versions of the vehicles under test.
+
+Computationally testing the aerodynamics of a vehicle is a more cost-effective strategy to start the designing process. Engineers will be able to iterate over their designers much faster before turning into physical testing. 
+
+## Create your Wind Tunnel scenario
+
+**Inductiva API** provides a framework for users to create personalized scenarios. Scenarios describe a physical model of a process in nature, that can be simulated. With a scenario, the complexity of configuring the underlying simulators is abstracted away and this allows users to configure only a few parameters to make an exploration of the physical model. All of the other parameters are fixed and stored within the scenario.
+
+With **Inductiva API**, users can create custom **wind tunnel** scenarios that fix the physics of the airflow and allow only a few parameters of the simulation to be changed - like the vehicle - and iterate over designs even faster. 
+
+In this repository, we will go over a mock-up of a wind tunnel scenario. In this scenario, we model the airflow as incompressible fluid the aerodynamics of an object inside a virtual wind tunnel for a given airflow velocity. We will use the OpenFOAM simulator available within **Inductiva API** and model the air as an incompressible fluid. 
+
+Air is injected through one side of the wind tunnel and exits through an outlet on the opposite side. The airflow within the tunnel is modified according to the structure of the object. The system is modeled with the steady-state equations for incompressible flow and the $k-\epsilon$ turbulence models. 
+
+
 
 ### Example:
 

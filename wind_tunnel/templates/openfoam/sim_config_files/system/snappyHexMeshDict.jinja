@@ -92,7 +92,7 @@ castellatedMeshControls
     (
         {
             file "object.eMesh";
-            level {{ resolution[1] }};
+            level {{ resolution + 1  }};
         }
     );
 
@@ -112,7 +112,7 @@ castellatedMeshControls
         object
         {
             // Surface-wise min and max refinement level
-            level ({{ resolution[0] }} {{ resolution[1] }});
+            level ({{ resolution }} {{ resolution + 1 }});
 
             // Optional specification of patch type (default is wall). No
             // constraint types (cyclic, symmetry) etc. are allowed.
@@ -146,7 +146,7 @@ castellatedMeshControls
         refinementBox
         {
             mode inside;
-            levels ((1E15 {{ resolution[0] }}));
+            levels ((1E15 {{ resolution }}));
         }
     }
 

@@ -11,9 +11,9 @@ windtunnel_scenario = wind_tunnel.WindTunnel(flow_velocity=[30, 0, 0],
                                              })
 
 # Run a simulation
-task = windtunnel_scenario.simulate(object_path="assets/vehicle.obj",
+task = windtunnel_scenario.simulate(object_path="vehicle.obj",
                                     num_iterations=50,
-                                    resolution="low")
+                                    resolution=2)
 
 task.wait()
 

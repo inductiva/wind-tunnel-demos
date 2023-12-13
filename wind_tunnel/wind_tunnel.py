@@ -3,8 +3,7 @@
 from dataclasses import dataclass
 import enum
 import os
-import shutil
-from typing import Optional, List, Literal
+from typing import Optional, List
 
 from absl import logging
 import numpy as np
@@ -54,7 +53,8 @@ class WindTunnel(inductiva.scenarios.Scenario):
     pressure_field, cutting planes and force coefficients.
     """
 
-    valid_simulators = [inductiva.simulators.OpenFOAM]
+    input_dir = "windtunnel-input-dir"
+    simulator = inductiva.simulators.OpenFOAM()
     template_files_dir = os.path.join(SCENARIO_TEMPLATE_DIR,
                                       OPENFOAM_TEMPLATE_INPUT_DIR)
 
@@ -92,16 +92,13 @@ class WindTunnel(inductiva.scenarios.Scenario):
         else:
             self.params["domain"] = domain
 
-    def simulate(
-        self,
-        simulator: inductiva.simulators.Simulator = inductiva.simulators.
-        OpenFOAM(),
-        machine_group: Optional[inductiva.resources.MachineGroup] = None,
-        storage_dir: Optional[str] = "",
-        object_path: Optional[str] = None,
-        num_iterations: float = 100,
-        resolution: Literal["high", "medium", "low"] = "medium"
-    ) -> inductiva.tasks.Task:
+    def simulate(self,
+                 machine_group: Optional[
+                     inductiva.resources.MachineGroup] = None,
+                 storage_dir: Optional[str] = "",
+                 object_path: Optional[str] = None,
+                 num_iterations: float = 100,
+                 resolution: int = 2) -> inductiva.tasks.Task:
         """Simulates the wind tunnel scenario synchronously.
 
         Args:
@@ -122,22 +119,17 @@ class WindTunnel(inductiva.scenarios.Scenario):
 
         self.object_path = object_path
         self.params["num_iterations"] = num_iterations
-        self.params["resolution"] = MeshResolution[resolution.upper()].value
+        self.params["resolution"] = resolution
 
         commands = self.get_commands()
-        task = super().simulate(simulator,
-                                machine_group=machine_group,
+        task = super().simulate(machine_group=machine_group,
                                 storage_dir=storage_dir,
                                 commands=commands)
 
         return task
 
-    def add_extra_input_files(
-            self,
-            simulator: inductiva.simulators.OpenFOAM,  # pylint: disable=unused-argument
-            input_dir):
-        """Configure object to be in specific place on input directory."""
+    def pre_simulate_hook(self):
+        """Set pre-simulation parameters."""
 
-        object_dir = os.path.join(input_dir, "constant", "triSurface")
-        os.mkdir(object_dir)
-        shutil.copy(self.object_path, os.path.join(object_dir, "object.obj"))
+        output_path = os.path.join("constant", "triSurface", "object.obj")
+        self.add_extra_input_files(self.object_path, output_path)

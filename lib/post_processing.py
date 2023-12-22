@@ -52,27 +52,6 @@ class WindTunnelOutput:
         """
 
         self.sim_output_path = sim_output_path
-        self.full_output = self.inspect_output()
-
-    def inspect_output(self):
-        """Inspect the output of the simulation.
-        
-        Return True if the simulation output contains more files than
-        the default ones. This is used to determine if the post-processing
-        was computed on the backend or not."""
-
-        default_output_files_list = [
-            "pressure_field.vtk", "streamlines.vtk", "stdout.txt", "stderr.txt",
-            "force_coefficients.csv", "xy_flow_slice.vtk", "xz_flow_slice.vtk",
-            "yz_flow_slice.vtk", "object.obj"
-        ]
-
-        sim_output_files = glob.glob(os.path.join(self.sim_output_path, "**",
-                                                  "*.*"),
-                                     recursive=True)
-        sim_output_files = [os.path.basename(file) for file in sim_output_files]
-
-        return sorted(sim_output_files) != sorted(default_output_files_list)
 
     def get_last_iteration(self):
         """Get the last iteration of the simulation from simulation outputs."""
@@ -86,12 +65,6 @@ class WindTunnelOutput:
 
     def get_output_mesh(self):
         """Get domain and object mesh info at the steady-state."""
-
-        if not self.full_output:
-            object_mesh = pv.read(
-                os.path.join(self.sim_output_path, "constant", "triSurface",
-                             "object.obj"))
-            return object_mesh
 
         # The OpenFOAM data reader from PyVista requires that a file named
         # "foam.foam" exists in the simulation output directory.
@@ -116,14 +89,8 @@ class WindTunnelOutput:
             and to render it.
         """
 
-        if not self.full_output:
-            logging.info("Pressure field was computed on the backend. "
-                         "Args passed here were ignored.")
-            object_mesh = pv.read(
-                os.path.join(self.sim_output_path, "pressure_field.vtk"))
-        else:
-            logging.info("Fetching pressure field over the object.")
-            _, object_mesh = self.get_output_mesh()
+        logging.info("Fetching pressure field over the object.")
+        _, object_mesh = self.get_output_mesh()
 
         field_notation = OpenFOAMPhysicalField["PRESSURE"].value
         pressure_field = MeshData(object_mesh, field_notation,
@@ -159,27 +126,20 @@ class WindTunnelOutput:
                 Types of files permitted: .vtk, .ply, .stl
         """
 
-        if not self.full_output:
-            logging.info("Streamlines were computed on the backend. "
-                         "Args passed here were ignored.")
-            object_mesh = self.get_output_mesh()
-            streamlines_mesh = pv.read(
-                os.path.join(self.sim_output_path, "streamlines.vtk"))
-        else:
-            logging.info("Computing the streamlines on the fly.")
-            mesh, object_mesh = self.get_output_mesh()
+        logging.info("Computing the streamlines on the fly.")
+        mesh, object_mesh = self.get_output_mesh()
 
-            streamlines_mesh = mesh.streamlines(
-                max_time=max_time,
-                n_points=n_points,
-                initial_step_length=initial_step_length,
-                source_radius=source_radius,
-                source_center=source_center)
+        streamlines_mesh = mesh.streamlines(
+            max_time=max_time,
+            n_points=n_points,
+            initial_step_length=initial_step_length,
+            source_radius=source_radius,
+            source_center=source_center)
 
-            if save_path is not None:
-                save_path = os.path.join(self.sim_output_path, save_path)
-                logging.info("Saving streamlines to %s.", save_path)
-                streamlines_mesh.save(save_path)
+        if save_path is not None:
+            save_path = os.path.join(self.sim_output_path, save_path)
+            logging.info("Saving streamlines to %s.", save_path)
+            streamlines_mesh.save(save_path)
 
         return Streamlines(object_mesh, streamlines_mesh, self.sim_output_path)
 
@@ -197,32 +157,24 @@ class WindTunnelOutput:
                 Types of files permitted: .vtk, .ply, .stl
         """
 
-        if not self.full_output:
-            logging.info("Flow slices were computed on the backend. "
-                         "The origin and save_path arg are ignored.")
-            object_mesh = self.get_output_mesh()
-            flow_slice_name = plane + "_flow_slice.vtk"
-            flow_slice = pv.read(
-                os.path.join(self.sim_output_path, flow_slice_name))
+        logging.info("Computing the flow on a slice.")
+        mesh, object_mesh = self.get_output_mesh()
+
+        if plane == "xy":
+            normal = (0, 0, 1)
+        elif plane == "yz":
+            normal = (1, 0, 0)
+        elif plane == "xz":
+            normal = (0, 1, 0)
         else:
-            logging.info("Computing the flow on a slice.")
-            mesh, object_mesh = self.get_output_mesh()
+            raise ValueError("Invalid view.")
 
-            if plane == "xy":
-                normal = (0, 0, 1)
-            elif plane == "yz":
-                normal = (1, 0, 0)
-            elif plane == "xz":
-                normal = (0, 1, 0)
-            else:
-                raise ValueError("Invalid view.")
+        flow_slice = mesh.slice(normal=normal, origin=origin)
 
-            flow_slice = mesh.slice(normal=normal, origin=origin)
-
-            if save_path is not None:
-                save_path = os.path.join(self.sim_output_path, save_path)
-                logging.info("Saving streamlines to %s.", save_path)
-                flow_slice.save(save_path)
+        if save_path is not None:
+            save_path = os.path.join(self.sim_output_path, save_path)
+            logging.info("Saving streamlines to %s.", save_path)
+            flow_slice.save(save_path)
 
         return FlowSlice(object_mesh, flow_slice, self.sim_output_path)
 
@@ -239,37 +191,29 @@ class WindTunnelOutput:
             save_path: Path to save the force coefficients in a .csv file.
         """
 
-        if not self.full_output:
-            force_coefficients_path = os.path.join(self.sim_output_path,
-                                                   "force_coefficients.csv")
-            with open(force_coefficients_path, "r",
-                      encoding="utf-8") as csv_file:
-                csv_reader = csv.reader(csv_file)
-                force_coefficients = list(csv_reader)
-        else:
-            num_header_lines = 8
-            force_coefficients_path = os.path.join(self.sim_output_path,
-                                                   "postProcessing",
-                                                   "forceCoeffs1", "0",
-                                                   "forceCoeffs.dat")
-            force_coefficients = []
-            last_iteration = int(self.get_last_iteration())
+        num_header_lines = 8
+        force_coefficients_path = os.path.join(self.sim_output_path,
+                                                "postProcessing",
+                                                "forceCoeffs1", "0",
+                                                "forceCoeffs.dat")
+        force_coefficients = []
+        last_iteration = int(self.get_last_iteration())
 
-            with open(force_coefficients_path, "r",
-                      encoding="utf-8") as forces_file:
-                for index, line in enumerate(forces_file.readlines()):
-                    # Pick the line 8 of the file:
-                    # [#, Time, Cm, Cd, Cl, Cl(f), Cl(r)] and remove # column
-                    if index == num_header_lines:
-                        force_coefficients.append(line.split()[1:])
-                    # Add the force coefficients for the simulation time chosen
-                    elif index == num_header_lines + last_iteration + 1:
-                        force_coefficients.append(line.split())
+        with open(force_coefficients_path, "r",
+                    encoding="utf-8") as forces_file:
+            for index, line in enumerate(forces_file.readlines()):
+                # Pick the line 8 of the file:
+                # [#, Time, Cm, Cd, Cl, Cl(f), Cl(r)] and remove # column
+                if index == num_header_lines:
+                    force_coefficients.append(line.split()[1:])
+                # Add the force coefficients for the simulation time chosen
+                elif index == num_header_lines + last_iteration + 1:
+                    force_coefficients.append(line.split())
 
-            if save_path:
-                with open(save_path, "w", encoding="utf-8") as csv_file:
-                    csv_writer = csv.writer(csv_file)
-                    csv_writer.writerows(force_coefficients)
+        if save_path:
+            with open(save_path, "w", encoding="utf-8") as csv_file:
+                csv_writer = csv.writer(csv_file)
+                csv_writer.writerows(force_coefficients)
 
         return force_coefficients
 

@@ -4,9 +4,12 @@ from lib import scenarios
 from lib import post_processing
 
 # Initialize the scenario
-wind_tunnel = models.WindTunnel(
-    flow_velocity=[30, 0, 0],
-    domain={"x": [-5, 15], "y": [-5, 5], "z": [0, 8]})
+wind_tunnel = models.WindTunnel(flow_velocity=[30, 0, 0],
+                                domain={
+                                    "x": [-5, 15],
+                                    "y": [-5, 5],
+                                    "z": [0, 8]
+                                })
 
 sim_parameters = models.SimulationParameters()
 
@@ -14,7 +17,6 @@ scenario = scenarios.WindTunnelScenario(wind_tunnel=wind_tunnel)
 
 task = scenario.simulate(object_path="assets/vehicle.obj",
                          sim_params=sim_parameters)
-
 
 task.wait()
 

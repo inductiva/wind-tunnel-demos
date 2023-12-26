@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Literal
 import pathlib
-import glob
 
 from absl import logging
 
@@ -193,14 +192,13 @@ class WindTunnelOutput:
 
         num_header_lines = 8
         force_coefficients_path = os.path.join(self.sim_output_path,
-                                                "postProcessing",
-                                                "forceCoeffs1", "0",
-                                                "forceCoeffs.dat")
+                                               "postProcessing", "forceCoeffs1",
+                                               "0", "forceCoeffs.dat")
         force_coefficients = []
         last_iteration = int(self.get_last_iteration())
 
         with open(force_coefficients_path, "r",
-                    encoding="utf-8") as forces_file:
+                  encoding="utf-8") as forces_file:
             for index, line in enumerate(forces_file.readlines()):
                 # Pick the line 8 of the file:
                 # [#, Time, Cm, Cd, Cl, Cl(f), Cl(r)] and remove # column
@@ -245,7 +243,7 @@ class FlowSlice:
         plotter.background_color = background_color
 
         center = self.mesh.center
-        normal = -self.mesh.compute_normals()["Normals"].mean(axis=0)
+        normal = self.mesh.compute_normals()["Normals"].mean(axis=0)
         plotter.camera.position = center + normal
         plotter.camera.focal_point = center
         plotter.camera.zoom(1.2)
@@ -387,7 +385,8 @@ class MeshData:
 
         plotter = pv.Plotter(off_screen=off_screen)
         pv.global_theme.background = background_color
-        plotter.add_mesh(self.mesh, scalars=self.scalar_name, cmap=scalars_cmap)
+        mesh = self.mesh.rotate_z(180)
+        plotter.add_mesh(mesh, scalars=self.scalar_name, cmap=scalars_cmap)
         plotter.show()
         if save_path is not None:
             save_path = os.path.join(self.sim_output_path, save_path)

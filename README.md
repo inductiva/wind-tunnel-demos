@@ -1,57 +1,70 @@
 # Wind Tunnel via Inductiva API
 
-<div align="center">
-<img src="assets/f1.gif" width=500 height=300 alt="Duck simulation">
-</div>
-
-With [**Inductiva API**](https://github.com/inductiva/inductiva/tree/main), exploring the
-aerodynamic of vehicles in a wind tunnel was never easier. 
-
-Physical wind tunnels serve as the base ground for testing the
-aerodynamics of vehicles - from your everyday commuter car to the
-high-performance F1 car. However, physical testing is expensive and involves the construction of
-physical versions of the vehicles under test. This cuts down
-significantly the ability to iterate and improve the aerodynamic
-performance of the vehicle.
+Wind tunnels are central for the development and testing of vehicle aerodynamics -
+from your everyday commuter car to the high-performance F1 car.
+With **Inductiva API** users can simplify their simulation workflow and build their
+custom virtual wind tunnels to accelerate the discovery of new designs.
 
 <div align="center">
-       <img src="assets/physical_windtunnel.jpg" alt="Physical Wind Tunnel" width=300>
-       <p> Fig. 1 - Physical wind tunnel of Mercedez-Benz. </p>
+<img src="assets/f1.gif" width=500 height=300 alt="F1 simulation">
 </div>
 
-## Accelerating Discovery
+In this repository, we assume users are familiar with one of the most popular
+open-source simulators for virtual wind tunnels, [OpenFOAM](https://www.openfoam.org).
+If not, we advise to get acquainted with it through the classical
+[motorbike tutorial](https://github.com/OpenFOAM/OpenFOAM-8/tree/master/tutorials/incompressible/simpleFoam/motorBike).
 
-With the rise of [CFD](https://en.wikipedia.org/wiki/Computational_fluid_dynamics)
-and computational hardware, the automotive and aeronautic industries turned
-to simulations to improve the aerodynamics of vehicles before even
-building them. CFD simulations represent **virtual wind tunnels** that
-mimic the conditions of the physical ones but allow for a more
-cost-effective strategy to start the designing process. Engineers can iterate
-over designs much faster and improve the quality of the vehicle, before moving
-to production.
+## Virtual wind tunnel simulations
 
-<div align="center">
-       <img src="assets/virtual_windtunnel.png" alt="Virtual Wind Tunnel" width=478>
-       <p> Fig. 2 - Virtual wind tunnel simulation with <b> Inductiva API</b>.
-       </p>
-</div>
+When performing wind tunnel tests - virtual or physical - only a few
+parameters are tweaked, for example, changing the airflow velocity for the same
+vehicle.
+**Inductiva API** provides a powerful mechanism to configure this simulation
+from this set of parameters, this workflow is designated as
+a **simulation scenario**.
 
-With **Inductiva API** these simulations are further simplified by setting up
-a custom virtual wind tunnel that abstracts the complexity of configuring the
-[OpenFOAM](https://github.com/inductiva/inductiva/wiki/OpenFOAM)
-simulator into the essential parameters necessary to test the
-aerodynamics of different vehicles. 
+Let's set an F1 car in a toy **wind tunnel** and run a simulation scenario:
 
-All, through a simple Python interface without having to worry about
-downloading/compiling and installing simulation packages and managing/maintaining
-computational resources.
+```python
+from lib import models
+from lib import scenarios
 
-To explore the wind tunnel with **Inductiva API**, first
-[install this repository and any dependencies](docs/0_INSTALL.md). 
+# Create a model of  a wind tunnel with a flow velocity of 40 m/s
+# and a domain of 18x8x8 m
+wind_tunnel = models.WindTunnel(flow_velocity=(40, 0, 0),
+                                domain={"x": [-6, 12], "y": [-4, 4], "z": [0, 8]})
 
-Then, follow the construction of the wind tunnel scenario through 
-[a Jupyter Notebook](1_windtunnel_notebook.ipynb) or directly through
-the documentation [docs/1_WINDTUNNEL.md].
+# Initialize a scenario with the wind tunnel
+wind_tunnel_scenario = scenarios.WindTunnelScenario(wind_tunnel)
+
+# Establish the num_iterations and resolution via the simulation parameters
+sim_params = scenarios.SimulationParameters(num_iterations=100, resolution=2)
+
+# Submit a non-blocking simulation task
+task = wind_tunnel_scenario.simulate(object_path="assets/f1_car.obj",
+                                     sim_params=sim_params)
+```
+
+In this code snippet, we are using the `WindTunnelScenario` to configure the
+simulation files for OpenFOAM with the `wind_tunnel` model, the F1 car and
+simulation parameters and simulating via **Inductiva API**. This scenario is a
+toy example that can be extended to more complex simulation scenarios, (e.g.,
+add rotation of wheels to the vehicle). 
+
+In this repository, users will learn how to create a simulation scenario from a
+low-level OpenFOAM call via **Inductiva API** to a higher-level structure within
+a Python class.
+
+Before starting, make sure to have the `inductiva` package installed and
+follow the instructions in the [installation section](docs/0_INSTALL.md).
+
+The **wind tunnel** tour is split into the following steps:
+1. [Running OpenFOAM simulations via Inductiva API](docs/1_OPENFOAM_SIM.md)
+2. [Templating your simulation files to introduce simple configuration](docs/2_TEMPLATING.md)
+3. [Creating a custom wind tunnel scenario with Python](docs/3_WINDTUNNEL_SCENARIO.md)
+
+**Disclaimer**: For the sake of time the simulations performed here are simple and
+don't represent any practical real-world application.
 
 To learn more about the `inductiva` package, check the
 [Inductiva API documentation](https://github.com/inductiva/inductiva/wiki).

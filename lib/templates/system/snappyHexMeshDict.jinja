@@ -159,7 +159,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (3.0001 3.0001 0.43);
+    locationInMesh ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][0] }});
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)

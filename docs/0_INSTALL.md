@@ -9,8 +9,6 @@ having to be worried about installing simulation packages and managing
 physical resources. Users need only to handle the science behind the problem
 and configure the simulation using the packages they know and love.
 
-**You handle the science, Inductiva manages the rest.**
-
 The `inductiva` package is easily installed using `pip`:
 
 ```bash

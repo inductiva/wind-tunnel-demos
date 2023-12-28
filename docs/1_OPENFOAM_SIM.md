@@ -46,8 +46,7 @@ commands = [{"cmd": "runApplication surfaceFeatures", "prompts": []},
             {"cmd": "runParallel potentialFoam", "prompts":[]},
             {"cmd": "runParallel simpleFoam", "prompts":[]},
             {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}
-        ]
+            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}]
 
 # Submit the simulation
 task = openfoam.run(input_dir="assets/openfoam_input",

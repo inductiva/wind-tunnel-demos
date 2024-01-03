@@ -50,14 +50,12 @@ class SimulationParameters:
         return asdict(self)
 
 
-
 class WindTunnelScenario(mixins.FileManager):
     """WindTunnel scenario."""
 
     SCENARIO_DIR = "wind_tunnel_input"
 
-    def __init__(self,
-                 wind_tunnel: WindTunnel):
+    def __init__(self, wind_tunnel: WindTunnel):
         """Initializes the `WindTunnel` conditions.
 
         Args:
@@ -66,25 +64,40 @@ class WindTunnelScenario(mixins.FileManager):
         self.wind_tunnel = wind_tunnel
 
     def get_commands(self):
-        commands = [
-            {"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant",
-             "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}
-        ]
+        commands = [{
+            "cmd": "runApplication surfaceFeatures",
+            "prompts": []
+        }, {
+            "cmd": "runApplication blockMesh",
+            "prompts": []
+        }, {
+            "cmd": "runApplication decomposePar -copyZero",
+            "prompts": []
+        }, {
+            "cmd": "runParallel snappyHexMesh -overwrite",
+            "prompts": []
+        }, {
+            "cmd": "runParallel potentialFoam",
+            "prompts": []
+        }, {
+            "cmd": "runParallel simpleFoam",
+            "prompts": []
+        }, {
+            "cmd": "runApplication reconstructParMesh -constant",
+            "prompts": []
+        }, {
+            "cmd": "runApplication reconstructPar -latestTime",
+            "prompts": []
+        }]
 
         return commands
 
-    def simulate(self,
-                 object_path: str,
-                 sim_params: SimulationParameters = SimulationParameters(),
-                 machine_group: Optional[resources.MachineGroup] = None,
-                ):
+    def simulate(
+        self,
+        object_path: str,
+        sim_params: SimulationParameters = SimulationParameters(),
+        machine_group: Optional[resources.MachineGroup] = None,
+    ):
         """Simulates the wind tunnel scenario synchronously.
 
         Args:
@@ -99,10 +112,8 @@ class WindTunnelScenario(mixins.FileManager):
                      **self.wind_tunnel.to_dict())
         self.add_file(object_path, "constant/triSurface/object.obj")
 
-
-        task = simulators.OpenFOAM().run(
-            input_dir=self.get_root_dir(),
-            machine_group=machine_group,
-            commands=self.get_commands())
+        task = simulators.OpenFOAM().run(input_dir=self.get_root_dir(),
+                                         machine_group=machine_group,
+                                         commands=self.get_commands())
 
         return task

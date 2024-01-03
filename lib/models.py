@@ -3,6 +3,7 @@
 from dataclasses import dataclass, asdict
 from typing import Tuple, Dict, Optional
 
+
 @dataclass
 class WindTunnel:
     """Wind tunnel model"""
@@ -13,8 +14,8 @@ class WindTunnel:
     def __post_init__(self):
         velocity_magnitude = self.flow_velocity[0]**2 + \
                         self.flow_velocity[1]**2 + \
-                        self.flow_velocity[2]**2  
-        assert velocity_magnitude < 100**2 # Magnitude must be less than 100 m/s
+                        self.flow_velocity[2]**2
+        assert velocity_magnitude < 100**2  # Magnitude must be less than 100m/s
         if self.domain is None:
             self.domain = {"x": [-5, 15], "y": [-4, 4], "z": [0, 8]}
 

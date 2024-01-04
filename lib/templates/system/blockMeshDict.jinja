@@ -19,14 +19,14 @@ convertToMeters 1;
 
 vertices
 (
-    ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][0] }})
-    ({{ domain["x"][1] }} {{ domain["y"][0] }} {{ domain["z"][0] }})
-    ({{ domain["x"][1] }} {{ domain["y"][1] }} {{ domain["z"][0] }})
-    ({{ domain["x"][0] }} {{ domain["y"][1] }} {{ domain["z"][0] }})
-    ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][1] }})
-    ({{ domain["x"][1] }} {{ domain["y"][0] }} {{ domain["z"][1] }})
-    ({{ domain["x"][1] }} {{ domain["y"][1] }} {{ domain["z"][1] }})
-    ({{ domain["x"][0] }} {{ domain["y"][1] }} {{ domain["z"][1] }})
+    ({{ x_min }} {{ y_min }} {{ z_min }})
+    ({{ x_max }} {{ y_min }} {{ z_min }})
+    ({{ x_max }} {{ y_max }} {{ z_min }})
+    ({{ x_min }} {{ y_max }} {{ z_min }})
+    ({{ x_min }} {{ y_min }} {{ z_max }})
+    ({{ x_max }} {{ y_min }} {{ z_max }})
+    ({{ x_max }} {{ y_max }} {{ z_max }})
+    ({{ x_min }} {{ y_max }} {{ z_max }})
 );
 
 blocks

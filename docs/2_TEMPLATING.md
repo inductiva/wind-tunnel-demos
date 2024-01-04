@@ -70,8 +70,8 @@ of the [previous tutorial](/docs/1_OPENFOAM_SIM.md) and a single template file
 for the airflow velocity and a few extra fixed parameters. 
 
 Hence, we add the directory with the input files to a root dir, then we render this 
-file on the `0/include` which will substitute the already existing file 
-`initialConditions` we have used on the previous simulation. 
+file on the `0/include` which will substitute the already existing file
+`initialConditions` we have used in the previous simulation. 
 
 ```python
 from inductiva import mixins
@@ -92,8 +92,8 @@ file_manager.add_file("assets/initialConditions.jinja",
 ```
 
 This code snippet has prepared a new directory named `velocity_dir` that contains
-the simulation as before, but now at an airflow speed of $50$ m/s in x-axis direction.
-Therefore, we can now use it to run a simulation with the same commands:
+the simulation as before, but now at an airflow speed of $50$ m/s in the x-axis direction.
+Therefore, we can now use it to simulate with the same commands:
 
 ```python
 import inductiva
@@ -118,7 +118,7 @@ task.wait()
 task.download_outputs()
 ```
 
-In order to iterate over different values of the flow velocity, it is enough to set
+To iterate over different values of the flow velocity, it is enough to set
 a for loop at the start and everything will work out smoothly!
 
 
@@ -129,12 +129,12 @@ wind tunnel scenario, where we want to provide the flexibility to change the dom
 geometry, the number of iterations of the solver in use, `simpleFoam`, and the 
 resolution of the mesh, besides the airflow velocity.
 
-These parameters are spread over several files, hence, in this example we start 
+These parameters are spread over several files, hence, in this example, we start 
 from a template directory, which contains the template files and the other files
 needed to run the simulation. 
 
 To create this directory we have started from the `assets/openfoam_dir` from the
-previous tutorail and templated the following files:
+previous tutorial and templated the following files:
 - `0/include/initialConditions.jinja` with the `flow_velocity`;
 - `system/blockMeshDict.jinja` with the `domain` geometry;
 - `system/controlDict.jinja` with the `num_iterations` of the solver;
@@ -165,7 +165,8 @@ file_manager.set_root_dir("windtunnel_dir")
 # Render the template directory with the parameters
 file_manager.add_dir("lib/templates",
                      **{"flow_velocity": (50, 0, 0),
-                        "domain": {"x": [-6, 12], "y": [-4, 4], "z": [0, 8]},
+                        "x_min": -6, "x_max": 12, "y_min": -4,
+                        "y_max": 4, "z_min": 0, "z_max": 8,
                         "num_iterations": 100,
                         "resolution": 3})
 
@@ -261,6 +262,6 @@ the OpenFOAM setup would be great. Hence,  we are on the right track, but we can
 To improve this workflow, we can encapsulate the code to run the **wind tunnel**
 simulation into a single class, which simplifies the workflow completely and there
 is only the need to write the templating mechanism once. Following this idea, in
-the [next tutorial](/docs/3_WINDTUNNEL_SCENARIO.md) we will create the
+the [next tutorial,](/docs/3_WINDTUNNEL_SCENARIO.md) we will create the
 `WindTunnelScenario` class to run the specific **wind tunnel** simulations we have
 been performing so far.

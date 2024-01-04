@@ -4,17 +4,17 @@ from lib import scenarios
 from lib import post_processing
 
 # Initialize the scenario
-wind_tunnel = models.WindTunnel(flow_velocity=[30, 0, 0],
-                                domain={
-                                    "x": [-5, 15],
-                                    "y": [-5, 5],
-                                    "z": [0, 8]
-                                })
+wind_tunnel = models.WindTunnel(flow_velocity=(30, 0, 0),
+                                x_min=-5,
+                                x_max=15,
+                                y_min=-5,
+                                y_max=5,
+                                z_min=0,
+                                z_max=8)
 
 # Set the simulation parameters with 200 iterations of the solver and a mesh
 # resolution level of 3.
-sim_parameters = scenarios.SimulationParameters(num_iterations=200,
-                                                resolution=3)
+sim_parameters = scenarios.SimulationParameters(num_iterations=50, resolution=3)
 
 scenario = scenarios.WindTunnelScenario(wind_tunnel=wind_tunnel)
 
@@ -28,11 +28,8 @@ task.wait()
 # Download all of the output files of the simulation
 output_dir = task.download_outputs()
 
-# Initialize a post-processing object from the output directory
-output = post_processing.WindTunnelOutput(output_dir)
+# Post-process methods: Render the pressure field over the object
+output = post_processing.WindTunnelOutput(output_dir, 50)
 
-# Get the pressure field
-pressure = output.get_object_pressure_field(save_path="pressure_field.vtk")
-
-# Render the pressure field
-pressure.render()
+pressure_field = output.get_object_pressure_field()
+pressure_field.render()

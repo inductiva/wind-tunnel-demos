@@ -37,8 +37,8 @@ geometry
     refinementBox
     {
         type searchableBox;
-        min ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][0] }});
-        max ({{ domain["x"][1] }} {{ domain["y"][1] }} {{ domain["z"][1] }});
+        min ({{ x_min }} {{ y_min }} {{ z_min }});
+        max ({{ x_max }} {{ y_max }} {{ z_max }});
     }
 };
 
@@ -159,7 +159,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][0] }});
+    locationInMesh ({{ x_min }} {{ y_min }} {{ z_min }});
 
 
     // Whether any faceZones (as specified in the refinementSurfaces)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Version:  6
+    \\  /    A nd           | Version:  8
      \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -28,17 +28,17 @@ addLayers       true;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    object
+    motorBike
     {
         type triSurfaceMesh;
-        file "object.obj";
+        file "motorBike.obj";
     }
 
     refinementBox
     {
         type searchableBox;
-        min (-5 -5 0);
-        max (15 5 8);
+        min (-1.0 -0.7 0.0);
+        max ( 8.0  0.7 2.5);
     }
 };
 
@@ -91,8 +91,8 @@ castellatedMeshControls
     features
     (
         {
-            file "object.eMesh";
-            level 3;
+            file "motorBike.eMesh";
+            level 5;
         }
     );
 
@@ -109,17 +109,17 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        object
+        motorBike
         {
             // Surface-wise min and max refinement level
-            level (2 3);
+            level (4 5);
 
             // Optional specification of patch type (default is wall). No
             // constraint types (cyclic, symmetry) etc. are allowed.
             patchInfo
             {
                 type wall;
-                inGroups (objectGroup);
+                inGroups (motorBikeGroup);
             }
         }
     }
@@ -146,7 +146,7 @@ castellatedMeshControls
         refinementBox
         {
             mode inside;
-            levels ((1E15 2));
+            levels ((1E15 4));
         }
     }
 
@@ -218,7 +218,7 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        "(lowerWall|object).*"
+        "(lowerWall|motorBike).*"
         {
             nSurfaceLayers 1;
         }

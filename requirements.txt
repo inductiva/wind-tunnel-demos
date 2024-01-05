@@ -1,3 +1,4 @@
 absl-py
+inductiva
 numpy
 pyvista

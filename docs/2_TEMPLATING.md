@@ -1,10 +1,10 @@
 ## Templating the wind tunnel simulation
 
-In the [the previous section](/docs/1_OPENFOAM_SIM.md), we seen how to launch
+In [the previous section](/docs/1_OPENFOAM_SIM.md), we have seen how to launch
 OpenFOAM simulations with **Inductiva API** and how difficult it becomes when we
 want to explore several configuration setups in our **wind tunnel**.
 
-In our path to build the simulation scenario, let's simplify the exploration first
+In our path to building the simulation scenario, let's simplify the exploration first
 with the powerful templating mechanism within **Inductiva API**. 
 
 This mechanism allows users to template their simulation files with tags that get
@@ -200,7 +200,7 @@ setups.
 ### Is this the best way to do it?
 
 Let's assume again that we want to iterate over the airflow velocity, for example,
-from 10 to 50 m/s. With the templating approach we won't need to create an input
+from 10 to 50 m/s. With the templating approach, we won't need to create an input
 directory manually with the desired changes. For example, based on the example A,
 we iterate over the airflow velocity and render each time a directory with the
 new airflow velocity, as follows:

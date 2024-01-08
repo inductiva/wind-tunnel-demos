@@ -19,7 +19,7 @@ class WindTunnel:
 
     def __post_init__(self):
         # Airflow velocity magnitude must be less than 100m/s
-        assert np.linalg.norm(np.array(self.flow_velocity)) < 100
+        assert np.linalg.norm(self.flow_velocity) < 100
 
         assert self.x_min < self.x_max
         assert self.y_min < self.y_max

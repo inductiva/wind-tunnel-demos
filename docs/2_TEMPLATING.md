@@ -147,7 +147,7 @@ same time. The template directory is placed at `lib/templates`.
 To perform the simulation from this template directory we render it completely
 on the spot with all of the parameters. In this case, the rendered directory
 keeps the same structure and the template files are rendered into files named
-without the `.jinja` extension. Moreover, in this directory the vehicle
+without the `.jinja` extension. Moreover, in this directory, the vehicle
 geometry is not present, so we will add to the root directory directly with a
 common name, like `object.obj`, that permits to change vehicles without
 altering the input files to much.
@@ -164,11 +164,11 @@ file_manager.set_root_dir("windtunnel_dir")
 
 # Render the template directory with the parameters
 file_manager.add_dir("lib/templates",
-                     **{"flow_velocity": (50, 0, 0),
-                        "x_min": -6, "x_max": 12, "y_min": -4,
-                        "y_max": 4, "z_min": 0, "z_max": 8,
-                        "num_iterations": 100,
-                        "resolution": 3})
+                     flow_velocity = (50, 0, 0),
+                     x_min = -6, x_max= 12, y_min= -4,
+                     y_max= 4, z_min= 0, z_max= 8,
+                     num_iterations= 100,
+                     resolution=3)
 
 # Add the motorbike geometry
 file_manager.add_file("assets/vehicle.obj", "constant/triSurface/object.obj")
@@ -238,7 +238,7 @@ for flow_velocity in flow_velocities_list:
     # Render the flow velocity in the template file `initialConditions.jinja`
     file_manager.add_file("assets/initialConditions.jinja",
                         "0/include/initialConditions",
-                        **{"flow_velocity": (flow_velocity, 0, 0)})
+                        flow_velocity= (flow_velocity, 0, 0))
 
     # Fetch the input dir prepared with the file manager and run the simulation
     task = openfoam.run(input_dir=file_manager.get_root_dir(), commands=commands)

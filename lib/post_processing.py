@@ -14,7 +14,6 @@ import os
 
 from absl import logging
 import pyvista as pv
-import pandas as pd
 import numpy as np
 
 # Map physical field names to OpenFOAM notation
@@ -148,17 +147,17 @@ class WindTunnelOutput:
         return FlowSlice(object_mesh, flow_slice, self.sim_output_path)
 
     def get_force_coefficient(self):
-        """Load the force coefficients."""
+        """Load the force coefficients.
+        
+        Returns:
+            An array with the following collumns Time, Cm, Cd, Cl, Cl(f), Cl(r).
+        """
 
         force_coefficients_path = os.path.join(self.sim_output_path,
                                                "postProcessing", "forceCoeffs1",
                                                "0", "forceCoeffs.dat")
 
-        columns = ["Time", "Cm", "Cd", "Cl", "Cl(f)", "Cl(r)"]
-        force_coefficients_df = pd.DataFrame(
-            np.loadtxt(force_coefficients_path), columns=columns)
-
-        return force_coefficients_df
+        return np.loadtxt(force_coefficients_path)
 
 
 class FlowSlice:

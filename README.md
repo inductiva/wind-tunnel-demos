@@ -29,10 +29,11 @@ Let's set an F1 car in a toy **wind tunnel** and run a simulation scenario:
 from lib import models
 from lib import scenarios
 
-# Create a model of  a wind tunnel with a flow velocity of 40 m/s
+# Create a model of  a wind tunnel with a flow velocity of 30 m/s
 # and a domain of 18x8x8 m
-wind_tunnel = models.WindTunnel(flow_velocity=(40, 0, 0),
-                                domain={"x": [-6, 12], "y": [-4, 4], "z": [0, 8]})
+wind_tunnel = models.WindTunnel(
+    flow_velocity=(30, 0, 0),
+    x_min=-3, x_max=15, y_min=-4, y_max=4, z_min=0, z_max=8)
 
 # Initialize a scenario with the wind tunnel
 wind_tunnel_scenario = scenarios.WindTunnelScenario(wind_tunnel)

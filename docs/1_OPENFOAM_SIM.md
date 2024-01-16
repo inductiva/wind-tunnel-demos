@@ -5,8 +5,9 @@ being one of them. As usual, users need to configure the OpenFOAM simulation fil
 and the OpenFOAM commands, then they can submit the simulation with 
 the `inductiva` package, all from Python.
 
-For this tutorial, we use the simulation files provided in the OpenFOAM
-[wind tunnel tutorial](https://github.com/OpenFOAM/OpenFOAM-8/tree/master/tutorials/incompressible/simpleFoam/motorBike).
+For this tutorial, we start from the simulation files provided in the OpenFOAM
+[wind tunnel tutorial](https://github.com/OpenFOAM/OpenFOAM-8/tree/master/tutorials/incompressible/simpleFoam/motorBike)
+and make adjustments to reduce the computational complexity for demonstration.
 
 ### OpenFOAM configuration
 
@@ -67,7 +68,7 @@ task.download_results()
 With a bit of post-processing, we obtain the pressure field over the vehicle:
 
 <div align="center">
-<img src="/assets/pressure_field.png" width=300 alt="Simulation Image">
+<img src="/assets/motorbike_pressure.png" width=300 alt="Simulation Image">
 </div>
 
 

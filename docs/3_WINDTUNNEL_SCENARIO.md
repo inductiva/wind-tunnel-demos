@@ -26,7 +26,7 @@ verification).
 
 ``` python
 from dataclasses import dataclass, asdict
-from typing import Dict, Optional, Tuple
+from typing import List
 
 @dataclass
 class WindTunnel:
@@ -34,11 +34,18 @@ class WindTunnel:
     
     Attributes:
         flow_velocity - a tuple with three values (v_x, v_y, v_z).
-        domain - Dict of the type {"x": [x0, x1], "y": [y0, y1], "z": [z0, z1]}.
+        x_min, x_max - floats with the minimum and maximum values of the x-axis.
+        y_min, y_max - floats with the minimum and maximum values of the y-axis.
+        z_min, z_max - floats with the minimum and maximum values of the z-axis.
     """
 
     flow_velocity: Tuple[float, float, float] = (30, 0, 0)
-    domain: Optional[Dict[str, list]] = None
+    x_min: float = -5
+    x_max: float = 15
+    y_min: float = -5
+    y_max: float = 5
+    z_min: float = 0
+    z_max: float = 8
 
     def to_dict(self):
         """Converts the object to a dictionary."""
@@ -49,7 +56,7 @@ A specific virtual `WindTunnel`` configuration is created as follows:
 
 ``` python
 wind_tunnel = WindTunnel(flow_velocity=(45, 0, 0), 
-                         domain={"x": [-4, 15], "y": [-4, 4], "z": [0, 5]})
+                         x_min=-2, x_max=10, y_min=-4, y_max=4, z_min=0, z_max=8)
 ```
 
 These parameters are tagged in the template files `0/include/initialConditions.jinja`
@@ -59,14 +66,14 @@ respectively. The latter looks as follows:
 ```txt
 vertices
 (
-    ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][0] }})
-    ({{ domain["x"][1] }} {{ domain["y"][0] }} {{ domain["z"][0] }})
-    ({{ domain["x"][1] }} {{ domain["y"][1] }} {{ domain["z"][0] }})
-    ({{ domain["x"][0] }} {{ domain["y"][1] }} {{ domain["z"][0] }})
-    ({{ domain["x"][0] }} {{ domain["y"][0] }} {{ domain["z"][1] }})
-    ({{ domain["x"][1] }} {{ domain["y"][0] }} {{ domain["z"][1] }})
-    ({{ domain["x"][1] }} {{ domain["y"][1] }} {{ domain["z"][1] }})
-    ({{ domain["x"][0] }} {{ domain["y"][1] }} {{ domain["z"][1] }})
+    ({{ x_min }} {{ y_min }} {{ z_min }})
+    ({{ x_max }} {{ y_min }} {{ z_min }})
+    ({{ x_max }} {{ y_max }} {{ z_min }})
+    ({{ x_min }} {{ y_max }} {{ z_min }})
+    ({{ x_min }} {{ y_min }} {{ z_max }})
+    ({{ x_max }} {{ y_min }} {{ z_max }})
+    ({{ x_max }} {{ y_max }} {{ z_max }})
+    ({{ x_min }} {{ y_max }} {{ z_max }})
 );
 ```
 
@@ -213,8 +220,8 @@ from lib import models
 from lib import scenarios
 
 # Initialize a wind tunnel with 45 m/s flow velocity
-wind_tunnel = models.WindTunnel(flow_velocity=(45, 0, 0),
-                                domain={"x": [-4, 15], "y": [-4, 4], "z": [0, 5]})
+wind_tunnel = models.WindTunnel(flow_velocity=[45, 0, 0],
+                                x_min=-4, x_max=15, y_min=-4, y_max=4, z_min=0, z_max=8)
 
 sim_params = scenarios.SimulationParameters(num_iterations=100, resolution=2)
 
@@ -322,7 +329,7 @@ sim_params = scenarios.SimulationParameters(num_iterations=100, resolution=2)
 for flow_velocity in flow_velocity_list:
     # Initialize a wind tunnel with the given flow velocity
     wind_tunnel = models.WindTunnel(flow_velocity=flow_velocity,
-                                    domain={"x": [-4, 15], "y": [-4, 4], "z": [0, 5]})
+                                    x_min=-4, x_max=15, y_min=-4, y_max=4, z_min=0, z_max=8)
 
     # Initialize a scenario with the wind tunnel and the simulation parameters
     wind_tunnel_scenario = scenarios.WindTunnelScenario(wind_tunnel)

@@ -8,59 +8,30 @@ the visualizations associated. Namely:
 
 Current Support - OpenFOAM
 """
-import csv
-import os
-from dataclasses import dataclass
-from enum import Enum
 from typing import Literal
 import pathlib
+import os
 
 from absl import logging
-
 import pyvista as pv
+import numpy as np
 
-
-@dataclass
-class OpenFOAMPhysicalField(Enum):
-    """Defines the notation used for physical field in OpenFOAM."""
-    PRESSURE = "p"
-    VELOCITY = "U"
+# Map physical field names to OpenFOAM notation
+PHYSICAL_FIELD = {"pressure": "p", "velocity": "U"}
 
 
 class WindTunnelOutput:
-    """Post-Process steady-state simulation outputs.
+    """Post-Process Wind Tunnel simulation outputs."""
 
-    This class contains several methods to post-process the output 
-    and visualize the results of a steady-state simulation where
-    time-independent results are obtained.
-
-    To be general we assume that a simulation is performed over a
-    regular box - the domain - and a certain object placed inside.
-    The object is either a small object inside the domain or a more
-    general object that spreads all through the domain.
-    """
-
-    def __init__(self, sim_output_path: str):
+    def __init__(self, sim_output_path: str, num_iteration: float):
         """Initializes a `WindTunnel` object.
 
         Args:
             sim_output_path: Path to simulation output files.
-            default_output_files_list: List of default output files
-                that are computed on the backend and saved to the
-                simulation output directory.
         """
 
         self.sim_output_path = sim_output_path
-
-    def get_last_iteration(self):
-        """Get the last iteration of the simulation from simulation outputs."""
-
-        # Sort all output folders and files by alphabetical order.
-        outputs_dir_list = sorted(os.listdir(self.sim_output_path))
-        # Second folder contains the last iteration outputs.
-        last_iteration = float(outputs_dir_list[1])
-
-        return last_iteration
+        self.num_iteration = num_iteration
 
     def get_output_mesh(self):
         """Get domain and object mesh info at the steady-state."""
@@ -72,7 +43,7 @@ class WindTunnelOutput:
         pathlib.Path(foam_file_path).touch(exist_ok=True)
 
         reader = pv.OpenFOAMReader(foam_file_path)
-        reader.set_active_time_value(self.get_last_iteration())
+        reader.set_active_time_value(self.num_iteration)
 
         full_mesh = reader.read()
         domain_mesh = full_mesh["internalMesh"]
@@ -91,11 +62,11 @@ class WindTunnelOutput:
         logging.info("Fetching pressure field over the object.")
         _, object_mesh = self.get_output_mesh()
 
-        field_notation = OpenFOAMPhysicalField["PRESSURE"].value
+        field_notation = PHYSICAL_FIELD["pressure"]
         pressure_field = MeshData(object_mesh, field_notation,
                                   self.sim_output_path)
 
-        if save_path is not None:
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             pressure_field.mesh.save(save_path)
 
@@ -114,7 +85,6 @@ class WindTunnelOutput:
         at the inlet of the WindTunnel.
 
         Args:
-            simulation_time: Time value to obtain simulation mesh.
             max_time: Time used for integration of the streamlines.
                 Not related with simulation time.
             n_points: Number of points to seed.
@@ -135,7 +105,7 @@ class WindTunnelOutput:
             source_radius=source_radius,
             source_center=source_center)
 
-        if save_path is not None:
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             logging.info("Saving streamlines to %s.", save_path)
             streamlines_mesh.save(save_path)
@@ -149,7 +119,6 @@ class WindTunnelOutput:
         """Get flow properties in a slice of the domain.
         
         Args:
-            simulation_time: Time value to obtain simulation mesh.
             plane: Orientation of the plane to slice the domain.
             origin: Origin of the plane.
             save_path: Path to save the flow slice. 
@@ -170,50 +139,25 @@ class WindTunnelOutput:
 
         flow_slice = mesh.slice(normal=normal, origin=origin)
 
-        if save_path is not None:
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             logging.info("Saving streamlines to %s.", save_path)
             flow_slice.save(save_path)
 
         return FlowSlice(object_mesh, flow_slice, self.sim_output_path)
 
-    def get_force_coefficients(self, save_path: str = None):
-        """Get the force coefficients of the object in the WindTunnel.
+    def get_force_coefficient(self):
+        """Load the force coefficients.
         
-        The force coefficients are provided in a .dat file during the
-        simulation run-time. This file contains 8 lines that are provide
-        the general input information. In this function, we read the file,
-        ignore the first 8 lines and read the force coefficients for the 
-        simulation_time chosen.
-
-        Args:
-            save_path: Path to save the force coefficients in a .csv file.
+        Returns:
+            An array with the following collumns Time, Cm, Cd, Cl, Cl(f), Cl(r).
         """
 
-        num_header_lines = 8
         force_coefficients_path = os.path.join(self.sim_output_path,
                                                "postProcessing", "forceCoeffs1",
                                                "0", "forceCoeffs.dat")
-        force_coefficients = []
-        last_iteration = int(self.get_last_iteration())
 
-        with open(force_coefficients_path, "r",
-                  encoding="utf-8") as forces_file:
-            for index, line in enumerate(forces_file.readlines()):
-                # Pick the line 8 of the file:
-                # [#, Time, Cm, Cd, Cl, Cl(f), Cl(r)] and remove # column
-                if index == num_header_lines:
-                    force_coefficients.append(line.split()[1:])
-                # Add the force coefficients for the simulation time chosen
-                elif index == num_header_lines + last_iteration + 1:
-                    force_coefficients.append(line.split())
-
-        if save_path:
-            with open(save_path, "w", encoding="utf-8") as csv_file:
-                csv_writer = csv.writer(csv_file)
-                csv_writer.writerows(force_coefficients)
-
-        return force_coefficients
+        return np.loadtxt(force_coefficients_path)
 
 
 class FlowSlice:
@@ -248,14 +192,14 @@ class FlowSlice:
         plotter.camera.focal_point = center
         plotter.camera.zoom(1.2)
 
-        # Obtain notation for the physical field for the simulator.
-        field_notation = OpenFOAMPhysicalField[physical_field.upper()].value
-
         plotter.add_mesh(self.object_mesh, color=object_color)
-        plotter.add_mesh(self.mesh, scalars=field_notation, cmap=flow_cmap)
+        plotter.add_mesh(self.mesh,
+                         scalars=PHYSICAL_FIELD[physical_field],
+                         cmap=flow_cmap)
         plotter.reset_camera(bounds=self.mesh.bounds)
         plotter.show()
-        if save_path is not None:
+
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             plotter.screenshot(save_path, return_img=False)
             logging.info("Flow slice render saved to %s.", save_path)
@@ -305,11 +249,8 @@ class Streamlines:
         else:
             raise ValueError("Invalid view.")
 
-        # Obtain notation for the physical field for the simulator.
-        field_notation = OpenFOAMPhysicalField[physical_field.upper()].value
-
         plotter.add_mesh(self.mesh.tube(radius=streamline_radius),
-                         scalars=field_notation,
+                         scalars=PHYSICAL_FIELD[physical_field],
                          cmap=flow_cmap)
 
         plotter.add_mesh(self.object_mesh, color=object_color)
@@ -317,7 +258,7 @@ class Streamlines:
         # until all of the meshes are visible.
         plotter.reset_camera(bounds=self.mesh.bounds, render=False)
         plotter.show()
-        if save_path is not None:
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             plotter.screenshot(save_path, return_img=False)
             logging.info("Streamlines render saved to %s.", save_path)
@@ -388,7 +329,7 @@ class MeshData:
         mesh = self.mesh.rotate_z(180)
         plotter.add_mesh(mesh, scalars=self.scalar_name, cmap=scalars_cmap)
         plotter.show()
-        if save_path is not None:
+        if save_path:
             save_path = os.path.join(self.sim_output_path, save_path)
             plotter.screenshot(save_path, return_img=False)
             logging.info("Mesh data render was saved to %s", save_path)

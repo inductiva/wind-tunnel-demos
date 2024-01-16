@@ -112,6 +112,7 @@ class WindTunnelScenario(mixins.FileManager):
                      **self.wind_tunnel.to_dict())
         self.add_file(object_path, "constant/triSurface/object.obj")
 
+        # pylint: disable=unexpected-keyword-arg
         task = simulators.OpenFOAM().run(input_dir=self.get_root_dir(),
                                          on=on,
                                          commands=self.get_commands())

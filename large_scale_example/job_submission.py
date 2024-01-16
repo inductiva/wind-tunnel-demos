@@ -111,5 +111,5 @@ def main(_):
                            FLAGS.resolution, machine_group)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(main)

@@ -96,7 +96,7 @@ class WindTunnelScenario(mixins.FileManager):
         self,
         object_path: str,
         sim_params: SimulationParameters = SimulationParameters(),
-        machine_group: Optional[resources.MachineGroup] = None,
+        on: Optional[resources.MachineGroup] = None,
     ):
         """Simulates the wind tunnel scenario synchronously.
 
@@ -113,7 +113,7 @@ class WindTunnelScenario(mixins.FileManager):
         self.add_file(object_path, "constant/triSurface/object.obj")
 
         task = simulators.OpenFOAM().run(input_dir=self.get_root_dir(),
-                                         machine_group=machine_group,
+                                         on=on,
                                          commands=self.get_commands())
 
         return task

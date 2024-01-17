@@ -8,7 +8,7 @@ from lib import scenarios
 
 import inductiva
 
-INPUT_DATASET = "../../wind_tunnel_data/metaballs_1k/res_0.07"
+INPUT_DATASET = "Path/To/Dir/With/Meshses"
 WORKING_DIR = None
 
 FLOW_VELOCITY_RANGE_X = [20, 30]

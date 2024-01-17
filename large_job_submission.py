@@ -8,7 +8,7 @@ from lib import scenarios
 
 import inductiva
 
-INPUT_DATASET = "Path/To/Dir/With/Meshses"
+INPUT_DATASET = "Path/to/meshes"
 WORKING_DIR = None
 
 FLOW_VELOCITY_RANGE_X = [20, 30]
@@ -25,7 +25,6 @@ RESOLUTION = 2
 MACHINE_TYPE = "c2-standard-16"
 NUM_MACHINES = 1
 DISK_SIZE_GB = 70
-ELASTIC_MACHINE_GROUP = True
 
 
 def run_simulation(object_path, flow_velocity_range_x, flow_velocity_range_y,
@@ -53,19 +52,6 @@ def run_simulation(object_path, flow_velocity_range_x, flow_velocity_range_y,
                       on=machine_group)
 
 
-def make_machine_group(machine_type, num_machines, disk_size_gb,
-                       elastic_machine_group):
-    if elastic_machine_group:
-        return inductiva.resources.ElasticMachineGroup(
-            machine_type=machine_type,
-            min_machines=1,
-            max_machines=num_machines,
-            disk_size_gb=disk_size_gb)
-    return inductiva.resources.MachineGroup(machine_type=machine_type,
-                                            num_machines=num_machines,
-                                            disk_size_gb=disk_size_gb)
-
-
 def main():
     object_paths = [
         os.path.join(INPUT_DATASET, path) for path in os.listdir(INPUT_DATASET)
@@ -74,8 +60,9 @@ def main():
     if WORKING_DIR is not None:
         inductiva.working_dir = WORKING_DIR
 
-    machine_group = make_machine_group(MACHINE_TYPE, NUM_MACHINES, DISK_SIZE_GB,
-                                       ELASTIC_MACHINE_GROUP)
+    machine_group = inductiva.resources.MachineGroup(machine_type=MACHINE_TYPE,
+                                                     num_machines=NUM_MACHINES,
+                                                     disk_size_gb=DISK_SIZE_GB)
     machine_group.start()
 
     for object_path in object_paths:

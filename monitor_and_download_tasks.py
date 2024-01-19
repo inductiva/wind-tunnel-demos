@@ -4,15 +4,15 @@ import json
 
 import inductiva
 
-PATH_TO_JSON = "/Path/to/task_metadata.json"
+PATH_TO_JSON = "../wind_tunnel_experiments/experiment_1/task_metadata.json"
 DOWNLOAD_TASKS = True
 
 
 def main():
-    json_lines = []
     with open(PATH_TO_JSON, "r", encoding="utf-8") as json_file:
-        for line in json_file:
-            json_lines.append(json.loads(line))
+        lines = json_file.readlines()
+
+    json_lines = [json.loads(line) for line in lines]
 
     task_counts = {}
 

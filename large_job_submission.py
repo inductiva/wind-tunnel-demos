@@ -1,6 +1,4 @@
 """Submits simulations to the API."""
-import os
-
 import numpy as np
 
 from lib import models

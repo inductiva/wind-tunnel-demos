@@ -4,7 +4,7 @@ import json
 
 import inductiva
 
-PATH_TO_JSON = "../wind_tunnel_experiments/experiment_1/task_metadata.json"
+PATH_TO_JSON = ""
 DOWNLOAD_TASKS = True
 
 

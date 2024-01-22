@@ -1,4 +1,4 @@
-"""Submits simulations to the API."""
+"""Submits a batch of simulations to the API."""
 import numpy as np
 
 from lib import models
@@ -25,12 +25,7 @@ NUM_MACHINES = 1
 DISK_SIZE_GB = 70
 
 
-def run_simulation(machine_group):
-    flow_velocity = [
-        np.random.uniform(FLOW_VELOCITY_RANGE_X[0], FLOW_VELOCITY_RANGE_X[1]),
-        np.random.uniform(FLOW_VELOCITY_RANGE_Y[0], FLOW_VELOCITY_RANGE_Y[1]),
-        np.random.uniform(FLOW_VELOCITY_RANGE_Y[0], FLOW_VELOCITY_RANGE_Z[1]),
-    ]
+def run_simulation(flow_velocity, machine_group):
     wind_tunnel = models.WindTunnel(flow_velocity=flow_velocity,
                                     x_min=DOMAIN_X[0],
                                     x_max=DOMAIN_X[1],
@@ -58,7 +53,15 @@ def main():
     machine_group.start()
 
     for _ in range(NUM_SIMULATIONS_PER_OBJECT):
-        run_simulation(machine_group)
+        flow_velocity = [
+            np.random.uniform(FLOW_VELOCITY_RANGE_X[0],
+                              FLOW_VELOCITY_RANGE_X[1]),
+            np.random.uniform(FLOW_VELOCITY_RANGE_Y[0],
+                              FLOW_VELOCITY_RANGE_Y[1]),
+            np.random.uniform(FLOW_VELOCITY_RANGE_Y[0],
+                              FLOW_VELOCITY_RANGE_Z[1]),
+        ]
+        run_simulation(flow_velocity, machine_group)
 
 
 if __name__ == "__main__":

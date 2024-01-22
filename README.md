@@ -63,8 +63,7 @@ The **wind tunnel** tour is split into the following steps:
 1. [Running OpenFOAM simulations via Inductiva API](docs/1_OPENFOAM_SIM.md)
 2. [Templating your simulation files to introduce simple configuration](docs/2_TEMPLATING.md)
 3. [Creating a custom wind tunnel scenario with Python](docs/3_WINDTUNNEL_SCENARIO.md)
-4. [Submiting many simulations to the API](docs/4_BATCH_WIND_TUNNELS.md)
-5. [Monitor the status of the tasks](docs/5_MONITOR_TASKS.md)
+4. [Submiting many simulations to the API](docs/4_BATCH_WIND_TUNNELS.md). You can then [monitor the status of the tasks](docs/5_MONITOR_TASKS.md) submitted to the API.
 
 **Disclaimer**: For the sake of time the simulations performed here are simple and
 don't represent any practical real-world application.

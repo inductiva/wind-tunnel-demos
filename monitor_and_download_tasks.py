@@ -5,7 +5,7 @@ import json
 import inductiva
 
 PATH_TO_JSON = ""
-DOWNLOAD_TASKS = True
+DOWNLOAD_TASKS = False
 
 
 def main():

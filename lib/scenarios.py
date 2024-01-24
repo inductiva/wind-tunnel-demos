@@ -64,31 +64,16 @@ class WindTunnelScenario(mixins.FileManager):
         self.wind_tunnel = wind_tunnel
 
     def get_commands(self):
-        commands = [{
-            "cmd": "runApplication surfaceFeatures",
-            "prompts": []
-        }, {
-            "cmd": "runApplication blockMesh",
-            "prompts": []
-        }, {
-            "cmd": "runApplication decomposePar -copyZero",
-            "prompts": []
-        }, {
-            "cmd": "runParallel snappyHexMesh -overwrite",
-            "prompts": []
-        }, {
-            "cmd": "runParallel potentialFoam",
-            "prompts": []
-        }, {
-            "cmd": "runParallel simpleFoam",
-            "prompts": []
-        }, {
-            "cmd": "runApplication reconstructParMesh -constant",
-            "prompts": []
-        }, {
-            "cmd": "runApplication reconstructPar -latestTime",
-            "prompts": []
-        }]
+        commands = [
+            "runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime",
+        ]
 
         return commands
 

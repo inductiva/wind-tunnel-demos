@@ -100,14 +100,14 @@ import inductiva
 
 openfoam = inductiva.simulators.OpenFOAM()
 
-commands = [{"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}]
+commands = ["runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime",]
 
 # Fetch the input dir prepared with the file manager and run the simulation
 task = openfoam.run(input_dir=file_manager.get_root_dir(),
@@ -176,14 +176,14 @@ file_manager.add_file("assets/vehicle.obj", "constant/triSurface/object.obj")
 # Run the simulation as before
 openfoam = inductiva.simulators.OpenFOAM()
 
-commands = [{"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}]
+commands = ["runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime",]
 
 # Fetch the input dir prepared with the file manager and run the simulation
 task = openfoam.run(input_dir=file_manager.get_root_dir(),
@@ -217,14 +217,14 @@ file_manager = mixins.FileManager()
 # Initialize the simulator and commands (which are fixed for the wind tunnel).
 openfoam = inductiva.simulators.OpenFOAM()
 
-commands = [{"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}]
+commands = ["runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime"]
 
 for flow_velocity in flow_velocities_list:
 

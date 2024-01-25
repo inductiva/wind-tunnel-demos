@@ -144,14 +144,14 @@ class WindTunnelScenario(mixins.FileManager):
     def get_commands(self):
         """Returns the commands to be executed in the simulation."""
         commands = [
-            {"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}
+            "runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime",
         ]
 
         return commands
@@ -159,14 +159,14 @@ class WindTunnelScenario(mixins.FileManager):
     def simulate(self,
                  object_path: str,
                  sim_params: SimulationParameters,
-                 machine_group: Optional[resources.MachineGroup] = None,
+                 on: Optional[resources.MachineGroup] = None,
                 ):
         """Simulates the wind tunnel scenario asynchronously.
 
         Args:
             object_path: Path to object inserted in the wind tunnel.
             sim_params: Simulation-specific configuration parameters.
-            machine_group: The machine group to use for the simulation.
+            on: The machine group to use for the simulation.
         """
 
         self.set_root_dir(self.SCENARIO_DIR)
@@ -179,7 +179,7 @@ class WindTunnelScenario(mixins.FileManager):
 
         task = simulators.OpenFOAM().run(
             input_dir=self.get_root_dir(),
-            machine_group=machine_group,
+            on=on,
             commands=self.get_commands())
 
         return task
@@ -200,7 +200,7 @@ extending or implementing their scenarios.
 
 The `MachineGroup` is an **Inductiva API** construct that allows the
 user to configure the computational resources used to run the
-simulations. By default (`machine_group = None`), the user does not need
+simulations. By default (`on = None`), the user does not need
 to configure this parameter and resources will be managed by default
 pool (see the
 [MachineGroup](https://github.com/inductiva/inductiva/wiki/Machines)
@@ -337,7 +337,7 @@ for flow_velocity in flow_velocity_list:
     # Submit the simulation, with the sim_params of the previus section
     task = wind_tunnel_scenario.simulate(object_path="assets/vehicle.obj",
                                          sim_params=sim_params,
-                                         machine_group=machines)
+                                         on=machines)
     tasks_list.append(task)
 ```
 

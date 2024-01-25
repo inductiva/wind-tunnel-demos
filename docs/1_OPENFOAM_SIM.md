@@ -40,14 +40,14 @@ import inductiva
 openfoam = inductiva.simulators.OpenFOAM()
 
 # Set the commands. The meshing and solver commands are run in parallel.
-commands = [{"cmd": "runApplication surfaceFeatures", "prompts": []},
-            {"cmd": "runApplication blockMesh", "prompts":[]},
-            {"cmd": "runApplication decomposePar -copyZero", "prompts":[]},
-            {"cmd": "runParallel snappyHexMesh -overwrite", "prompts":[]},
-            {"cmd": "runParallel potentialFoam", "prompts":[]},
-            {"cmd": "runParallel simpleFoam", "prompts":[]},
-            {"cmd": "runApplication reconstructParMesh -constant", "prompts":[]},
-            {"cmd": "runApplication reconstructPar -latestTime", "prompts": []}]
+commands = ["runApplication surfaceFeatures",
+            "runApplication blockMesh",
+            "runApplication decomposePar -copyZero",
+            "runParallel snappyHexMesh -overwrite",
+            "runParallel potentialFoam",
+            "runParallel simpleFoam",
+            "runApplication reconstructParMesh -constant",
+            "runApplication reconstructPar -latestTime"]
 
 # Submit the simulation
 task = openfoam.run(input_dir="assets/openfoam_input",
